@@ -604,12 +604,21 @@ namespace WindowsFormsApp1
             if (UserGridView.Visible == true)
             {
                 data_dont_exist("select * from user", "user");
-            }else if (SampleView.Visible == true)
+                SetSearchComboBox();
+                SetSearchComboBox1();
+
+            }
+            else if (SampleView.Visible == true)
             {
                 data_dont_exist("select * from product", "user");
-            }else if (OrderGridView.Visible == true)
+                SetSearchComboBox();
+                SetSearchComboBox1();
+            }
+            else if (OrderGridView.Visible == true)
             {
                 data_dont_exist("select * from igalaxy.order", "user");
+                SetSearchComboBox();
+                SetSearchComboBox1();
             }
 
 
