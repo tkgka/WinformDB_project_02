@@ -23,29 +23,24 @@ namespace WindowsFormsApp1
         }
 
         MySqlConnection conn;
-        MySqlDataAdapter dataAdapter, dataAdapter2, dataAdapter3;
-        DataSet dataSet, dataSet2, dataSet3;
-
+        MySqlDataAdapter dataAdapter;
+        DataSet dataSet;
+        string data = "GSM";
         private void Form1_Load(object sender, EventArgs e)
         {
-            conn = new MySqlConnection("server=localhost;port=3306;database=igalaxy;uid=root;pwd=root");
+            
+            var dataBase = "server=localhost;port=3306;database="+data+";uid=root;pwd=root";
+
+            conn = new MySqlConnection(dataBase);
 
             dataSet = new DataSet();
-            dataSet2 = new DataSet();
-            dataSet3 = new DataSet();
+            
 
             dataAdapter = new MySqlDataAdapter("SELECT * from user", conn);
             dataAdapter.Fill(dataSet, "user");
             UserGridView.DataSource = dataSet.Tables["user"];
 
-            dataAdapter2 = new MySqlDataAdapter("SELECT * from product", conn);
-            dataAdapter2.Fill(dataSet2, "product");
-            SampleView.DataSource = dataSet2.Tables["product"];
-
-            dataAdapter3 = new MySqlDataAdapter("SELECT * from igalaxy.order", conn);
-            dataAdapter3.Fill(dataSet3, "order");
-            OrderGridView.DataSource = dataSet3.Tables["order"];
-
+          
             try
             {
                 conn.Open();
@@ -68,12 +63,8 @@ namespace WindowsFormsApp1
             
 
             comboBox1.Items.AddRange(userdata);
-            comboBox1.Visible = false;
-            textBox1.Visible = false;
-            comboBox3.Visible = false;
-            comboBox2.Visible = false;
-            label6.Visible = false;
-            button4.Visible = false;
+            UserGridView.Visible = true;
+            button4.Visible = true;
             SetSearchComboBox();
             SetSearchComboBox1();
         }
@@ -82,34 +73,6 @@ namespace WindowsFormsApp1
         private void SetSearchComboBox()
         {
             
-            string sql = "SELECT user_position FROM user";
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
-
-            try
-            {
-                // CountryCode 목록 표시
-                conn.Open();
-                MySqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())  // 다음 레코드가 있으면 true
-                {
-                    if (!comboBox2.Items.Contains(reader.GetString("user_position"))) {
-                        comboBox2.Items.Add(reader.GetString("user_position"));
-                    }
-                    
-                }
-                reader.Close();
-
-               
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-
 
         }
 
@@ -117,34 +80,7 @@ namespace WindowsFormsApp1
         private void SetSearchComboBox1()
         {
 
-            string sql = "SELECT user_grade FROM user";
-            MySqlCommand cmd = new MySqlCommand(sql, conn);
-
-            try
-            {
-                // CountryCode 목록 표시
-                conn.Open();
-                MySqlDataReader reader = cmd.ExecuteReader();
-                while (reader.Read())  // 다음 레코드가 있으면 true
-                {
-                    if (!comboBox3.Items.Contains(reader.GetString("user_grade")))
-                    {
-                        comboBox3.Items.Add(reader.GetString("user_grade"));
-                    }
-                }
-                reader.Close();
-
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-
+          
 
         }
 
@@ -313,33 +249,9 @@ namespace WindowsFormsApp1
             eApp.Quit();
         }
 
-        private void Select_All()
-        {
-            string query = "select * from user";
-            dataAdapter2.SelectCommand = new MySqlCommand(query, conn);
-            try
-            {
-                conn.Open();
-                dataSet2.Clear();
-                if (dataAdapter2.Fill(dataSet2, "user") > 0) // 검색한 데이터의 행 수 반환
-                    UserGridView.DataSource = dataSet2.Tables["user"];
-                else
-                    MessageBox.Show("검색된 데이터가 없습니다.");
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-            finally
-            {
-                conn.Close();
-            }
-        }
 
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            Select_All();
-        }
+
+        
 
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -364,25 +276,19 @@ namespace WindowsFormsApp1
 
         private void Insert_btn_Click(object sender, EventArgs e)
         {
-            if (UserGridView.Visible == false && SampleView.Visible == false && OrderGridView.Visible == false)
-            {
-                MessageBox.Show("테이블을 선택 후 다시 시도하세요");
-            }
-            else
-            {
+         
+            
                 DialogResult result = MessageBox.Show("추가 하시겠습니까?", "알림", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                string query = "insert into user(user_id, user_pw, user_name, user_grade, ph_num, user_email, user_position)" +
-               "values(@user_id, @user_pw, @user_name, @user_grade, @ph_num, @user_email, @user_position)";
+                string query = "insert into user(user_id, user_pw, user_name, user_email, reSet)" +
+               "values(@user_id, @user_pw, @user_name,@user_email, @reSet)";
                 dataAdapter.InsertCommand = new MySqlCommand(query, conn);
                 try
                 {
                     dataAdapter.InsertCommand.Parameters.AddWithValue("@user_id", UserGridView.SelectedRows[0].Cells["user_id"].Value.ToString());
                     dataAdapter.InsertCommand.Parameters.AddWithValue("@user_pw", UserGridView.SelectedRows[0].Cells["user_pw"].Value.ToString());
                     dataAdapter.InsertCommand.Parameters.AddWithValue("@user_name", UserGridView.SelectedRows[0].Cells["user_name"].Value.ToString());
-                    dataAdapter.InsertCommand.Parameters.AddWithValue("@user_grade", UserGridView.SelectedRows[0].Cells["user_grade"].Value.ToString());
-                    dataAdapter.InsertCommand.Parameters.AddWithValue("@ph_num", UserGridView.SelectedRows[0].Cells["ph_num"].Value.ToString());
                     dataAdapter.InsertCommand.Parameters.AddWithValue("@user_email", UserGridView.SelectedRows[0].Cells["user_email"].Value.ToString());
-                    dataAdapter.InsertCommand.Parameters.AddWithValue("@user_position", UserGridView.SelectedRows[0].Cells["user_position"].Value.ToString());
+                    dataAdapter.InsertCommand.Parameters.AddWithValue("@reSet", UserGridView.SelectedRows[0].Cells["reSet"].Value.ToString());
                 }
                 catch
                 {
@@ -409,17 +315,12 @@ namespace WindowsFormsApp1
                 {
                     conn.Close();
                 }
-            }
+            
         }
 
         private void Button2_Click(object sender, EventArgs e)
         {
-            if (UserGridView.Visible == false && SampleView.Visible == false && OrderGridView.Visible == false)
-            {
-                MessageBox.Show("테이블을 선택 후 시도하세요");
-            }
-            else
-            {
+        
                 saveFileDialog1.Filter = "텍스트 파일(*.txt)|*.txt";
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
@@ -427,49 +328,39 @@ namespace WindowsFormsApp1
                 }
             }
 
-        }
+        
 
         private void Button1_Click(object sender, EventArgs e)
         {
-            if (UserGridView.Visible == false && SampleView.Visible == false && OrderGridView.Visible == false) {
-                MessageBox.Show("테이블을 선택 후 시도하십시오");
-                
-            }
-            else
-            {
+           
                 saveFileDialog1.Filter = "엑셀 파일(*.xlsx)|*.xlsx";
                 if (saveFileDialog1.ShowDialog() == DialogResult.OK)
                 {
                     SaveExcel(saveFileDialog1.FileName);
                 }
             }
-        }
+        
 
         private void Delete_btn_Click(object sender, EventArgs e)
         {
-            if (UserGridView.Visible == false && SampleView.Visible == false && OrderGridView.Visible == false)
-            {
-                MessageBox.Show("테이블을 선택 후 다시 시도하세요");
-            }
-            else
-            {
+            /*
                 DialogResult result = MessageBox.Show("정말 삭제하시겠습니까?", "알림", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 try
                 {
-                    int target = (int)UserGridView.SelectedRows[0].Cells["user_idx"].Value;
+                    int target = (int)UserGridView.SelectedRows[0].Cells["user_id"].Value;
                 
-                string query = "delete from user where user_idx=@user_idx";
+                string query = "delete from user where user_id=@user_id";
                 dataAdapter.DeleteCommand = new MySqlCommand(query, conn);
-                dataAdapter.DeleteCommand.Parameters.Add("@user_idx", MySqlDbType.Int32);
-                dataAdapter.DeleteCommand.Parameters["@user_idx"].Value = target;
+                dataAdapter.DeleteCommand.Parameters.Add("@user_id", MySqlDbType.Int32);
+                dataAdapter.DeleteCommand.Parameters["@user_id"].Value = target;
 
-                DataRow[] findRows = dataSet.Tables["user"].Select($"user_idx={target}");
+                DataRow[] findRows = dataSet.Tables["user"].Select($"user_id={target}");
                 findRows[0].Delete();
                 }
-                catch
+                catch (Exception E)
                 {
-                    MessageBox.Show("error");
-                }
+                MessageBox.Show(E.Message);
+            }
                 try
                 {
                     dataAdapter.Update(dataSet, "user");
@@ -478,25 +369,57 @@ namespace WindowsFormsApp1
                 {
                     MessageBox.Show("error");
                 }
+                */
+
+            string sql = "delete from user where user_id=@user_id";
+            dataAdapter.DeleteCommand = new MySqlCommand(sql, conn);
+            string id = (string)UserGridView.SelectedRows[0].Cells["user_id"].Value;
+            //var selectedRows = dataGridView1.SelectedRows;
+
+
+            dataAdapter.DeleteCommand.Parameters.AddWithValue("@user_id", id);
+
+            try
+            {
+                conn.Open();
+
+                if (dataAdapter.DeleteCommand.ExecuteNonQuery() > 0)
+                {
+                    dataSet.Clear();
+                    dataAdapter.Fill(dataSet, "user");
+                    UserGridView.DataSource = dataSet.Tables["user"];
+
+                }
+                else
+                {
+                    MessageBox.Show("삭제된 데이터가 없습니다");
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                conn.Close();
+
+            }
+
+
+
         }
 
         private void Update_btn_Click(object sender, EventArgs e)
         {
-            if (UserGridView.Visible == false && SampleView.Visible == false && OrderGridView.Visible == false)
-            {
-                MessageBox.Show("테이블을 선택 후 다시 시도하세요");
-            }
-            else { 
-
+      
             DialogResult result = MessageBox.Show("업데이트 하시겠습니까?", "알림", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             string query = "update user set user_id=@user_id, user_pw=@user_pw, user_name=@user_name, user_grade=@user_grade, " +
-"ph_num=@ph_num, user_email=@user_email, user_position=@user_position where user_idx = @user_idx";
+"ph_num=@ph_num, user_email=@user_email, user_position=@user_position where user_id = @user_id";
 
             dataAdapter.UpdateCommand = new MySqlCommand(query, conn);
                 try
                 {
-                    dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_idx", UserGridView.SelectedRows[0].Cells["user_idx"].Value.ToString());
+                    dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_id", UserGridView.SelectedRows[0].Cells["user_id"].Value.ToString());
                     dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_id", UserGridView.SelectedRows[0].Cells["user_id"].Value.ToString());
                     dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_pw", UserGridView.SelectedRows[0].Cells["user_pw"].Value.ToString());
                     dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_name", UserGridView.SelectedRows[0].Cells["user_name"].Value.ToString());
@@ -530,7 +453,7 @@ namespace WindowsFormsApp1
             {
                 conn.Close();
             }
-        }
+        
         }
 
         private void Button3_Click(object sender, EventArgs e)
@@ -588,6 +511,16 @@ namespace WindowsFormsApp1
             comboBox3.Text = "";
         }
 
+        private void TextBox3_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void User_btn_Click(object sender, EventArgs e)
+        {
+            
+        }
+
         private void TextBox1_TextChanged(object sender, EventArgs e)
         {
 
@@ -608,20 +541,7 @@ namespace WindowsFormsApp1
                 SetSearchComboBox1();
 
             }
-            else if (SampleView.Visible == true)
-            {
-                data_dont_exist("select * from product", "user");
-                SetSearchComboBox();
-                SetSearchComboBox1();
-            }
-            else if (OrderGridView.Visible == true)
-            {
-                data_dont_exist("select * from igalaxy.order", "user");
-                SetSearchComboBox();
-                SetSearchComboBox1();
-            }
-
-
+          
         }
 
         private void UserGridView_KeyDown(object sender, KeyEventArgs e)
@@ -723,14 +643,14 @@ namespace WindowsFormsApp1
             if (e.KeyCode == Keys.Delete)
             {
                 DialogResult result = MessageBox.Show("정말 삭제하시겠습니까?", "알림", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                int target = (int)UserGridView.SelectedRows[0].Cells["user_idx"].Value;
+                int target = (int)UserGridView.SelectedRows[0].Cells["user_id"].Value;
 
-                string query = "delete from user where user_idx=@user_idx";
+                string query = "delete from user where user_id=@user_id";
                 dataAdapter.DeleteCommand = new MySqlCommand(query, conn);
-                dataAdapter.DeleteCommand.Parameters.Add("@user_idx", MySqlDbType.Int32);
-                dataAdapter.DeleteCommand.Parameters["@user_idx"].Value = target;
+                dataAdapter.DeleteCommand.Parameters.Add("@user_id", MySqlDbType.Int32);
+                dataAdapter.DeleteCommand.Parameters["@user_id"].Value = target;
 
-                DataRow[] findRows = dataSet.Tables["user"].Select($"user_idx={target}");
+                DataRow[] findRows = dataSet.Tables["user"].Select($"user_id={target}");
                 findRows[0].Delete();
 
                 dataAdapter.Update(dataSet, "user");
@@ -740,11 +660,11 @@ namespace WindowsFormsApp1
             {
                 DialogResult result = MessageBox.Show("업데이트 하시겠습니까?", "알림", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 string query = "update user set user_id=@user_id, user_pw=@user_pw, user_name=@user_name, user_grade=@user_grade, " +
-"ph_num=@ph_num, user_email=@user_email, user_position=@user_position where user_idx = @user_idx";
+"ph_num=@ph_num, user_email=@user_email, user_position=@user_position where user_id = @user_id";
 
                 dataAdapter.UpdateCommand = new MySqlCommand(query, conn);
 
-                dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_idx", UserGridView.SelectedRows[0].Cells["user_idx"].Value.ToString());
+                dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_id", UserGridView.SelectedRows[0].Cells["user_id"].Value.ToString());
                 dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_id", UserGridView.SelectedRows[0].Cells["user_id"].Value.ToString());
                 dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_pw", UserGridView.SelectedRows[0].Cells["user_pw"].Value.ToString());
                 dataAdapter.UpdateCommand.Parameters.AddWithValue("@user_name", UserGridView.SelectedRows[0].Cells["user_name"].Value.ToString());
@@ -777,33 +697,6 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void user_btn_Click(object sender, EventArgs e)
-        {
-            UserGridView.Visible = true;
-            SampleView.Visible = false;
-            OrderGridView.Visible = false;
-            comboBox1.Visible = true;
-            label6.Visible = true;
-            button4.Visible = true;
-        }
-
-        private void ord_btn_Click(object sender, EventArgs e)
-        {
-            UserGridView.Visible = false;
-            SampleView.Visible = false;
-            OrderGridView.Visible = true;
-            comboBox1.Visible = false;
-            textBox1.Visible = false;
-        }
-
-        private void board_btn_Click(object sender, EventArgs e)
-        {
-            UserGridView.Visible = false;
-            SampleView.Visible = true;
-            OrderGridView.Visible = false;
-            comboBox1.Visible = false;
-            textBox1.Visible = false;
-        }
 
     }
 }
