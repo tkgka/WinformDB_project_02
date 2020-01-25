@@ -25,7 +25,7 @@ namespace WindowsFormsApp1
         MySqlConnection conn;
         MySqlDataAdapter dataAdapter;
         DataSet dataSet;
-        string data = "GSM";
+        string data = "igalaxy";
         private void Form1_Load(object sender, EventArgs e)
         {
             
